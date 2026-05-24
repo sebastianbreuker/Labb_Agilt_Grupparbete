@@ -30,7 +30,7 @@ Tasks ska sparas i en databas
 - Backend
 ## Vendela
 - Frontend
-## Person 4
+## Hugo
 - Frontend
 ---
 # Git Workflow
