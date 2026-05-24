@@ -36,14 +36,8 @@ function App() {
     try {
       setError("");
       setIsLoading(true);
-      const response = await fetch(`${API_BASE}/todo`);
-
-      if (!response.ok) {
-        throw new Error("Kunde inte hämta todos.");
-      }
-
-      const data = await response.json();
-      setTodos(Array.isArray(data) ? data : []);
+      const data = await todoApi.fetchTodos();
+      setTodos(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Något gick fel.");
     } finally {
@@ -104,11 +98,7 @@ function App() {
     <main className="page">
       <header className="header">
         <div>
-          <p className="eyebrow">Skolprojekt</p>
           <h1>Din Todo-lista</h1>
-          <p className="subtitle">
-            Enkel koll pa vad som är kvar att göra idag.
-          </p>
         </div>
         <div className="stats">
           <div>
@@ -173,9 +163,7 @@ function App() {
         {isLoading ? (
           <p className="muted">Laddar...</p>
         ) : todos.length === 0 ? (
-          <p className="muted">
-            Inga uppgifter än. Lägg till en for att komma igang.
-          </p>
+          null
         ) : (
 
           
