@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5017/api";
+import * as todoApi from "./api/todoApi";
+import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -65,23 +66,9 @@ function App() {
     event.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title: trimmed }),
-      });
-
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Kunde inte skapa todo.");
-      }
-
-      const created = await response.json();
+      const created = await todoApi.createTodo(trimmed);
       setTodos((prev) => [created, ...prev]);
       setTitle("");
     } catch (err) {
@@ -92,14 +79,7 @@ function App() {
   const handleComplete = async (id) => {
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo/${id}/complete`, {
-        method: "PATCH",
-      });
-
-      if (!response.ok) {
-        throw new Error("Kunde inte markera som klar.");
-      }
-
+      await todoApi.completeTodo(id);
       setTodos((prev) =>
         prev.map((todo) =>
           todo.id === id ? { ...todo, isCompleted: true } : todo,
@@ -113,14 +93,7 @@ function App() {
   const handleDelete = async (id) => {
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Kunde inte ta bort todo.");
-      }
-
+      await todoApi.deleteTodo(id);
       setTodos((prev) => prev.filter((todo) => todo.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Något gick fel.");
