@@ -250,3 +250,30 @@
     gap: 12px;
   }
 }
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.filters button {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  background: var(--secondary);
+  color: var(--secondary-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
+}
+
+.filters button:hover {
+  transform: translateY(-1px);
+  background: var(--accent);
+  color: var(--accent-ink);
+}

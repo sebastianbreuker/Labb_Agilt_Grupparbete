@@ -8,11 +8,28 @@ function App() {
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [darkMode, setDarkMode] = useState(false);
 
   const remainingCount = useMemo(
     () => todos.filter((todo) => !todo.isCompleted).length,
     [todos],
   );
+
+  const filteredTodos = useMemo(() => {
+  switch (filter) {
+    case "active":
+      return todos.filter((todo) => !todo.isCompleted);
+
+    case "completed":
+      return todos.filter((todo) => todo.isCompleted);
+
+    default:
+      return todos;
+  }
+}, [todos, filter]);
+
+  
 
   const loadTodos = async () => {
     try {
@@ -36,6 +53,13 @@ function App() {
   useEffect(() => {
     loadTodos();
   }, []);
+
+  useEffect(() => {
+  document.body.setAttribute(
+    "data-theme",
+    darkMode ? "dark" : "light"
+  );
+}, [darkMode]);
 
   const handleCreate = async (event) => {
     event.preventDefault();
@@ -123,6 +147,12 @@ function App() {
             <span className="stat-value">{remainingCount}</span>
           </div>
         </div>
+        <button
+         className="ghost-button"
+          onClick={() => setDarkMode(!darkMode)}
+            >
+           {darkMode ? "☀️ Light" : "🌙 Dark"}
+        </button>
       </header>
 
       <section className="card">
@@ -153,6 +183,20 @@ function App() {
           </button>
         </div>
 
+        <div className="filters">
+         <button onClick={() => setFilter("all")}>
+           Alla
+        </button>
+
+        <button onClick={() => setFilter("active")}>
+          Aktiva
+        </button>
+
+        <button onClick={() => setFilter("completed")}>
+         Klara
+        </button>
+       </div>
+
         {isLoading ? (
           <p className="muted">Laddar...</p>
         ) : todos.length === 0 ? (
@@ -160,8 +204,11 @@ function App() {
             Inga uppgifter än. Lägg till en for att komma igang.
           </p>
         ) : (
+
+          
+
           <ul className="todo-list">
-            {todos.map((todo) => (
+            {filteredTodos.map((todo) => (
               <li key={todo.id} className={todo.isCompleted ? "done" : ""}>
                 <div>
                   <p className="todo-title">{todo.title}</p>
