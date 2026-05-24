@@ -21,13 +21,13 @@ function App() {
       const response = await fetch(`${API_BASE}/todo`);
 
       if (!response.ok) {
-        throw new Error("Kunde inte hamta todos.");
+        throw new Error("Kunde inte hämta todos.");
       }
 
       const data = await response.json();
       setTodos(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +61,7 @@ function App() {
       setTodos((prev) => [created, ...prev]);
       setTitle("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
@@ -82,7 +82,7 @@ function App() {
         ),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
@@ -99,7 +99,7 @@ function App() {
 
       setTodos((prev) => prev.filter((todo) => todo.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
@@ -110,7 +110,7 @@ function App() {
           <p className="eyebrow">Skolprojekt</p>
           <h1>Din Todo-lista</h1>
           <p className="subtitle">
-            Enkel koll pa vad som ar kvar att gora idag.
+            Enkel koll pa vad som är kvar att göra idag.
           </p>
         </div>
         <div className="stats">
@@ -157,7 +157,7 @@ function App() {
           <p className="muted">Laddar...</p>
         ) : todos.length === 0 ? (
           <p className="muted">
-            Inga uppgifter an. Laggt till en for att komma igang.
+            Inga uppgifter än. Lägg till en for att komma igang.
           </p>
         ) : (
           <ul className="todo-list">
