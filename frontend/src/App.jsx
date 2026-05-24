@@ -140,7 +140,7 @@ function App() {
             />
           </div>
           <button type="submit" className="primary-button">
-            Lagg till
+            Lägg till
           </button>
         </form>
 
