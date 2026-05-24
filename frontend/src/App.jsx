@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5017/api";
+import * as todoApi from "./api/todoApi";
+import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -18,16 +19,10 @@ function App() {
     try {
       setError("");
       setIsLoading(true);
-      const response = await fetch(`${API_BASE}/todo`);
-
-      if (!response.ok) {
-        throw new Error("Kunde inte hamta todos.");
-      }
-
-      const data = await response.json();
-      setTodos(Array.isArray(data) ? data : []);
+      const data = await todoApi.fetchTodos();
+      setTodos(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     } finally {
       setIsLoading(false);
     }
@@ -41,65 +36,37 @@ function App() {
     event.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title: trimmed }),
-      });
-
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Kunde inte skapa todo.");
-      }
-
-      const created = await response.json();
+      const created = await todoApi.createTodo(trimmed);
       setTodos((prev) => [created, ...prev]);
       setTitle("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
   const handleComplete = async (id) => {
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo/${id}/complete`, {
-        method: "PATCH",
-      });
-
-      if (!response.ok) {
-        throw new Error("Kunde inte markera som klar.");
-      }
-
+      await todoApi.completeTodo(id);
       setTodos((prev) =>
         prev.map((todo) =>
           todo.id === id ? { ...todo, isCompleted: true } : todo,
         ),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/todo/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Kunde inte ta bort todo.");
-      }
-
+      await todoApi.deleteTodo(id);
       setTodos((prev) => prev.filter((todo) => todo.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nagot gick fel.");
+      setError(err instanceof Error ? err.message : "Något gick fel.");
     }
   };
 
@@ -107,11 +74,7 @@ function App() {
     <main className="page">
       <header className="header">
         <div>
-          <p className="eyebrow">Skolprojekt</p>
-          <h1>Din Todo-lista</h1>
-          <p className="subtitle">
-            Enkel koll pa vad som ar kvar att gora idag.
-          </p>
+          <h1>Todo-lista</h1>
         </div>
         <div className="stats">
           <div>
@@ -126,70 +89,17 @@ function App() {
       </header>
 
       <section className="card">
-        <form className="form" onSubmit={handleCreate}>
-          <div className="input-group">
-            <label htmlFor="todo-title">Ny todo</label>
-            <input
-              id="todo-title"
-              name="todo-title"
-              type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Skriv en uppgift..."
-              maxLength={120}
-            />
-          </div>
-          <button type="submit" className="primary-button">
-            Lagg till
-          </button>
-        </form>
+        <TodoForm title={title} onTitleChange={setTitle} onSubmit={handleCreate} />
 
         {error ? <p className="error">{error}</p> : null}
 
-        <div className="list-header">
-          <h2>Uppgifter</h2>
-          <button type="button" className="ghost-button" onClick={loadTodos}>
-            Uppdatera
-          </button>
-        </div>
-
-        {isLoading ? (
-          <p className="muted">Laddar...</p>
-        ) : todos.length === 0 ? (
-          <p className="muted">
-            Inga uppgifter an. Laggt till en for att komma igang.
-          </p>
-        ) : (
-          <ul className="todo-list">
-            {todos.map((todo) => (
-              <li key={todo.id} className={todo.isCompleted ? "done" : ""}>
-                <div>
-                  <p className="todo-title">{todo.title}</p>
-                  <span className="todo-meta">
-                    {todo.isCompleted ? "Klar" : "Inte klar"}
-                  </span>
-                </div>
-                <div className="actions">
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={() => handleComplete(todo.id)}
-                    disabled={todo.isCompleted}
-                  >
-                    Klar
-                  </button>
-                  <button
-                    type="button"
-                    className="ghost-button"
-                    onClick={() => handleDelete(todo.id)}
-                  >
-                    Ta bort
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <TodoList
+          todos={todos}
+          isLoading={isLoading}
+          onRefresh={loadTodos}
+          onComplete={handleComplete}
+          onDelete={handleDelete}
+        />
       </section>
     </main>
   );
